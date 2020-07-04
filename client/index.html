@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Bootstrap 101 Template</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <!-- Latest compiled and minified CSS -->
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+
+      <!-- Optional theme -->
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+      <!-- Validation Plugin Css -->
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jQuery-Validation-Engine/2.6.4/validationEngine.jquery.min.css" integrity="sha512-fvBUZJJBrJrzrFYM/EN2isPokoNnx331y30ZXIxRRlop1aq6rT6d8oY6WJVsiXZoso0dIZ2nbQjtGLi6Kkxr/Q==" crossorigin="anonymous" />
+
+      <!-- Jquery CDN-->
+      <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+      <!-- Validation Plugin Script --> 
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jQuery-Validation-Engine/2.6.4/jquery.validationEngine.min.js" integrity="sha512-MKqdT8JgKftxlK6oK4S+Hh44ivKyaPncl6qN9JZEGKJGQZJMiSoPzehLcbvd/1XMieEP1Q4A3wzzhTrvBUUcUQ==" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jQuery-Validation-Engine/2.6.4/languages/jquery.validationEngine-en.min.js" integrity="sha512-Ij9UYYVaoKa/v7gg8ImceAH416VUcHygRY7O3hwo4tFjq9/HeqpvuhdkNZJZRqBmvf4/I9XetDHzO1z4V0HfPw==" crossorigin="anonymous"></script>
+     <style type="text/css">
+          body {
+            padding-top: 40px;
+            padding-bottom: 40px;
+            background-color: #eee;
+          }
+
+          .form-details {
+            max-width: 330px;
+            padding: 15px;
+            margin: 0 auto;
+          }
+          .form-details .form-details-heading,
+          .form-details .checkbox {
+            margin-bottom: 10px;
+          }
+          .form-details .checkbox {
+            font-weight: normal;
+          }
+          .form-details .form-control {
+            position: relative;
+            height: auto;
+            padding: 10px;
+            font-size: 16px;
+          }
+          .form-details .form-control:focus {
+            z-index: 2;
+          }
+      </style>
+  </head>
+  <body>
+    <div class="container">
+
+      <form class="form-details" method="post">
+
+        <h2 class="form-details-heading">Details</h2>
+
+        <label for="inputEmail" class="sr-only">Email address</label>
+        <input type="email" id="inputEmail" class="form-control validate[required]" 
+        placeholder="Email address" required autofocus>
+
+        <label for="inputCardNumber" class="sr-only">Card Number</label>
+        <input type="text" id="inputCardNumber" class="form-control validate[required]" 
+        placeholder="Card Number" required>
+
+        <label for="inputCVV" class="sr-only">CVV</label>
+        <input type="text" id="inputCVV" class="form-control validate[required]" 
+        placeholder="Security Code" required>
+
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" value="agree"> Agree to Terms
+          </label>
+        </div>
+
+        <button class="btn btn-lg btn-primary btn-block" id="form_submit" type="submit">Submit</button>
+      </form>
+
+    </div> <!-- /container -->
+  </body>
+</html>
+<script>
+  $(document).ready(function(){
+    var load_time = new Date();
+    var user_typed = false;
+    var load_height = $(window).height();
+    var load_width = $(window).width();
+    var start;
+    var resize_time;
+    var json_req = {
+     eventType: "",
+     url: window.location.href,
+     sessionId: "123123-123123-123123123",
+    };
+    //Event For Screen Size
+    var resize_constraint = 0;
+    $(window).resize(function(e){
+      resize_time = new Date();
+      if(resize_constraint==0){
+         screen.height;
+         resize_constraint += 1;
+         json_req.eventType = "windowResize";
+         json_req.originalHeight = load_height;
+         json_req.originalWidth = load_width;
+         json_req.resizedHeight = $(window).height();
+         json_req.resizedWidth = $(window).width();
+         resizeWindow();
+      }
+    });
+    //Event for Copy & Paste
+    $("input").on('copy', function() {
+      json_req.eventType = "copyAndPaste";
+      json_req.formId = $(this).attr('id');
+      json_req.pasted = false;
+      current_time = new Date();
+      diff = load_time - current_time;
+      console.log(json_req,diff);
+      copyAndPaste();
+    });
+
+    $("input").on('paste', function() {
+      json_req.eventType = "copyAndPaste";
+      json_req.formId = $(this).attr('id');
+      json_req.pasted = true;
+      console.log(json_req);
+      copyAndPaste();
+    });
+
+    //Time taken from the first character to submit
+    $("input").keypress(function(event) {
+      if (!user_typed) {
+        user_typed = true;
+        start = new Date();
+      }
+    });
+
+    $('#form_submit').click(function(e){
+      if($(".form-details").validationEngine('validate')){
+         end = new Date();
+         diff = (start.getTime() - end.getTime()) / 1000;
+         user_typed = false;  
+         json_req.eventType = "timeTaken";
+         json_req.time = Math.abs(diff);
+         $('.form-details').trigger('reset');
+         console.log(diff,json_req);
+         timeTaken();
+       }else{
+         alert('Please enter the details');
+         e.preventDefault();
+       }
+    });
+    function timeTaken(){
+      var timetaken_data_json = JSON.stringify({
+          "eventType"  : json_req.eventType,
+          "websiteURL" : json_req.url,
+          "sessionID"  : json_req.sessionId.toString(),
+          "time"       : json_req.time.toString() 
+       });
+      sendData(timetaken_data_json);
+    }
+    function copyAndPaste(){
+      var copyAndPaste_data_json =  JSON.stringify({
+          "eventType"  : json_req.eventType,
+          "websiteURL" : json_req.url,
+          "sessionID"  : json_req.sessionId.toString(),
+          "pasted"     : json_req.pasted, 
+          "formId"     : json_req.formId
+       });
+      sendData(copyAndPaste_data_json);
+    }
+    function resizeWindow(){
+      var resize_data_json =  JSON.stringify({
+          "eventType"      : json_req.eventType,
+          "websiteURL"     : json_req.url,
+          "sessionID"      : json_req.sessionId.toString(),
+          "originalHeight" : json_req.originalHeight.toString(), 
+          "originalWidth"  : json_req.originalWidth.toString(),
+          "resizedHeight"  : json_req.resizedHeight.toString(),
+          "resizedWidth"   : json_req.resizedWidth.toString(),
+       });
+      sendData(resize_data_json);
+    }
+    function sendData(post_data){
+      $.ajax({
+      url: 'http://localhost:3000/form',
+      type: 'POST',
+      dataType: 'application/json',
+      data:post_data
+      })
+      .done(function() {
+        console.log("success");
+      })
+      .fail(function() {
+        console.log("error");
+      })
+      .always(function() {
+        console.log("complete");
+      });
+    }
+  });
+  </script>
