@@ -44,6 +44,5 @@ func EventData(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("err", err)
 	}
-	// terminal_op := ` Structure for user resp["eventType"] `
 	log.Println(resp)
 }

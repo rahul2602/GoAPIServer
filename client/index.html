@@ -113,7 +113,6 @@
       json_req.pasted = false;
       current_time = new Date();
       diff = load_time - current_time;
-      console.log(json_req,diff);
       copyAndPaste();
     });
 
@@ -121,7 +120,6 @@
       json_req.eventType = "copyAndPaste";
       json_req.formId = $(this).attr('id');
       json_req.pasted = true;
-      console.log(json_req);
       copyAndPaste();
     });
 
@@ -141,7 +139,6 @@
          json_req.eventType = "timeTaken";
          json_req.time = Math.abs(diff);
          $('.form-details').trigger('reset');
-         console.log(diff,json_req);
          timeTaken();
        }else{
          alert('Please enter the details');
